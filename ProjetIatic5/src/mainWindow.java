@@ -274,6 +274,20 @@ public class mainWindow extends JFrame implements ActionListener{
 		JButton btnProcessAll = new JButton("Process and Save All");
 		btnProcessAll.setBounds(466, 610, 197, 31);
 		contentPane.add(btnProcessAll);
+		
+		JButton createButton = new JButton("Create Answer Sheet");
+		createButton.setBounds(555, 41, 120, 23);
+		contentPane.add(createButton);
+		
+		createButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 		btnProcessAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				for(int d=0; d< detectResults.size(); d++){
