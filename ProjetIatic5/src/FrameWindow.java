@@ -1,24 +1,21 @@
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-
-import org.opencv.core.Core;
 
 public class FrameWindow{
 
 	JFrame frame;
+	JFrame frameGestionAnneeScolaire;
 	
+
 	public FrameWindow() {
 		initialize();
 	}
-
 	
 	private void initialize() {
 		frame = new mainWindow();
-		frame.setTitle("OpenCV Project");
+		frame.setTitle("Projet OpenCv Notation");
+		
+		frameGestionAnneeScolaire = new gestion();
+		frameGestionAnneeScolaire.setTitle("Gestion des années scolaires");
 	}
 
 }

@@ -7,15 +7,14 @@ import org.opencv.core.Core;
 public class main {
 
 	public static void main(String[] args) {
-	    // Load the library
-		//System.out.println(System.getProperty("java.library.path")+":"+Core.NATIVE_LIBRARY_NAME);
-		System.loadLibrary(Core.NATIVE_LIBRARY_NAME); //openCv3.0
-		//new traitement();
+	    
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME); // Load the library openCv3.0
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
 					FrameWindow window = new FrameWindow();
 					window.frame.setVisible(true);
+					window.frameGestionAnneeScolaire.setVisible(false);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

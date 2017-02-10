@@ -1,0 +1,16 @@
+The tasks in order of preference:
+0) move to 4 boxes per question
+1) check if 2 or 3 or 4 boxes are checked or if none.
+2) rotation works well
+3) processing "n" pages per student: if you have two pages or more: for example:
+                   First page: question1: score 10
+                   First page: question2: score 20
+                   First page: question3: score 40
+                   First page: question4: score 30
+                   First page: question5: score 10
+                   Second page: question6 (5 + 1): score 10
+                   Second page: question7 (5 + 2): score 20
+                   Second page: question8 (5 + 3): score 10
+                   Second page: question9 (5 + 4): score 30
+                   Etc ......
+Algorithm of 3): we find the student number "21202864 for example" just in the first page, and if we find pages where there is not a student number, we will consider that they belong to "21202864" .

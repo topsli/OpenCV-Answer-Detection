@@ -1,5 +1,3 @@
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.Image;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +7,6 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.opencv.core.Core;
 
 import models.Exam;
 import models.SchoolYear;
@@ -24,7 +21,6 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.awt.event.ActionEvent;
-import javax.swing.JTextField;
 import javax.swing.JTextArea;
 
 public class mainWindow extends JFrame implements ActionListener{
@@ -42,10 +38,6 @@ public class mainWindow extends JFrame implements ActionListener{
 	JComboBox imageSelectComboBox = new JComboBox();
 	public List<Exam> exams= new ArrayList<Exam>();
 
-	/**
-	 * Launch the application.
-	 */
-	
 
 	/**
 	 * Create the frame.
@@ -54,24 +46,22 @@ public class mainWindow extends JFrame implements ActionListener{
 		
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 720, 720);
+		setBounds(100, 100, 720, 689);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		JLabel lblSchoolYear = new JLabel("School year");
-		lblSchoolYear.setBounds(13, 12, 81, 14);
+		JLabel lblSchoolYear = new JLabel("Ann\u00E9e scolaire");
+		lblSchoolYear.setBounds(10, 15, 92, 14);
 		contentPane.add(lblSchoolYear);
 		
 		JComboBox yearComboBox = new JComboBox();
-		yearComboBox.setBounds(104, 8, 186, 22);
-		//System.out.println(schoolYears.size());
+		yearComboBox.setBounds(107, 11, 70, 22);
 		for(int i=0;i<schoolYears.size();i++){
 			yearComboBox.addItem(schoolYears.get(i));
 		}
 		subjects = db.getSubjectFromSchoolYear((SchoolYear)yearComboBox.getSelectedObjects()[0]);
-		//System.out.println(subjects);
 		subjectComboBox.removeAllItems();
 		for(int i=0;i<subjects.size();i++){
 			subjectComboBox.addItem(subjects.get(i));
@@ -79,7 +69,6 @@ public class mainWindow extends JFrame implements ActionListener{
 		yearComboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				subjects = db.getSubjectFromSchoolYear((SchoolYear)yearComboBox.getSelectedObjects()[0]);
-				//System.out.println(subjects);
 				subjectComboBox.removeAllItems();
 				for(int i=0;i<subjects.size();i++){
 					subjectComboBox.addItem(subjects.get(i));
@@ -95,7 +84,6 @@ public class mainWindow extends JFrame implements ActionListener{
 				examComboBox.removeAllItems();
 				if(subjectComboBox.getSelectedObjects().length >0){
 					exams = db.getExamFromSubject((Subject)subjectComboBox.getSelectedObjects()[0]);
-					
 					for(int i=0;i<exams.size();i++){
 						examComboBox.addItem(exams.get(i));
 					}
@@ -103,39 +91,25 @@ public class mainWindow extends JFrame implements ActionListener{
 			}
 		});
 		
-//		JButton btnOk = new JButton("Ok");
-//		btnOk.setBounds(234, 9, 59, 19);
-//		btnOk.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				subjects = db.getSubjectFromSchoolYear((SchoolYear)yearComboBox.getSelectedObjects()[0]);
-//				//System.out.println(subjects);
-//				subjectComboBox.removeAllItems();
-//				for(int i=0;i<subjects.size();i++){
-//					subjectComboBox.addItem(subjects.get(i));
-//				}
-//			}
-//		});
-//		contentPane.add(btnOk);
-		
-		examComboBox.setBounds(377, 42, 122, 21);
+		examComboBox.setBounds(466, 12, 92, 21);
 		contentPane.add(examComboBox);
 		
-		subjectComboBox.setBounds(104, 41, 186, 23);
+		subjectComboBox.setBounds(269, 11, 103, 23);
 		contentPane.add(subjectComboBox);
 		
-		JLabel lblSubject = new JLabel("Subject");
-		lblSubject.setBounds(13, 45, 46, 14);
+		JLabel lblSubject = new JLabel("Mati\u00E8re");
+		lblSubject.setBounds(213, 15, 46, 14);
 		contentPane.add(lblSubject);
 		
 		JLabel labelImage = new JLabel("");
-		labelImage.setBounds(10, 74, 410, 595);
+		labelImage.setBounds(10, 57, 410, 612);
 		contentPane.add(labelImage);
 		
 		JTextArea textArea = new JTextArea();
-		textArea.setBounds(430, 108, 264, 448);
+		textArea.setBounds(430, 90, 264, 405);
 		contentPane.add(textArea);
 		
-		imageSelectComboBox.setBounds(430, 75, 264, 22);
+		imageSelectComboBox.setBounds(430, 57, 264, 22);
 		contentPane.add(imageSelectComboBox);
 		imageSelectComboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -149,18 +123,29 @@ public class mainWindow extends JFrame implements ActionListener{
 	        		labelImage.setIcon(finalImg);
 	        		
 	        		String textToShow = "";
-					textToShow+="Student Id is:"+detect.getStudentId()+"\n";
+					textToShow+="Numéro d'étudiant :"+detect.getStudentId()+"\n"; //here it's me i modify but he works before that
 					answers = detect.getAnswers();
 					for(int i=0;i<answers.size();i++){
-						textToShow+="Question :"+(i+1)+" Answer is :"+answers.get(i)+"\n";
+						String reponse;
+						if (answers.get(i)==1) {
+							reponse = "Non aquis"; //Not good marks
+						}
+						else if (answers.get(i)==2) {
+							reponse = "Aquis"; // good marks
+						}
+						else{
+							reponse = "Bien aquis"; // very good marks
+						}
+						
+						textToShow+="Question"+(i+1)+" ==> "+reponse+"\n";
 						
 					}
 					if(detect.getIsChecked() == 1){
-						textToShow+="Checked : checked\n";
-						textToShow+="Score :"+detect.getScore();
+						textToShow+="Feuille : remplie !\n";
+						textToShow+="Note :"+detect.getScore();
 					}
 					else{
-						textToShow+="Checked : not checked";
+						textToShow+="Feuille : non remplie !";
 					}
 				
 					textArea.setText(textToShow);
@@ -169,13 +154,13 @@ public class mainWindow extends JFrame implements ActionListener{
 		}
 		);
 		
-		JButton btnChooseFile = new JButton("Choose File");
-		btnChooseFile.setBounds(555, 8, 120, 22);
+		JButton btnChooseFile = new JButton("Parcourir");
+		btnChooseFile.setBounds(602, 11, 92, 22);
 		btnChooseFile.addActionListener(new ActionListener( ) {
             public void actionPerformed(ActionEvent e) {
             	JFileChooser fc = new JFileChooser();
             	fc.setMultiSelectionEnabled(true);
-            	fc.setCurrentDirectory(new File("C://"));
+            	fc.setCurrentDirectory(new File("C:/Users/Benreghai/Desktop/Inputs"));
             	FileNameExtensionFilter filter = new FileNameExtensionFilter("Image", "jpg", "png", "gif");
             	fc.addChoosableFileFilter(filter);
             	int result = fc.showSaveDialog(null);
@@ -186,21 +171,13 @@ public class mainWindow extends JFrame implements ActionListener{
             		detectResults = new ArrayList<DetectResult>();
             		for(int i=0;i<selectedFiles.length;i++){
             			String path = selectedFiles[i].getAbsolutePath();
-            			System.out.println(path);
             			imageUrls.add(path);
             			DetectResult detect = new DetectResult();
             			detect.setImageUrl(path);
             			detect.Processing();
             			detectResults.add(detect);
             			imageSelectComboBox.addItem(detect);
-//                		imageUrl = path;
-//                		ImageIcon myImage = new ImageIcon(path);
-//                		Image img = myImage.getImage();
-//                		Image newImage = img.getScaledInstance(labelImage.getWidth(), labelImage.getHeight(), Image.SCALE_SMOOTH);
-//                		ImageIcon finalImg = new ImageIcon(newImage);
-//                		labelImage.setIcon(finalImg);
-            		}
-            		   		
+            		}   		
             	}
             	else
             	{
@@ -213,12 +190,12 @@ public class mainWindow extends JFrame implements ActionListener{
 		
 		
 		
-		JLabel lblNewLabel = new JLabel("exam");
-		lblNewLabel.setBounds(310, 45, 46, 14);
+		JLabel lblNewLabel = new JLabel("Examen");
+		lblNewLabel.setBounds(406, 15, 46, 14);
 		contentPane.add(lblNewLabel);
 		
-		JButton btnSaveScore = new JButton("Process and Save");
-		btnSaveScore.setBounds(466, 567, 197, 31);
+		JButton btnSaveScore = new JButton("Traiter et sauvegarder");
+		btnSaveScore.setBounds(460, 567, 218, 31);
 		contentPane.add(btnSaveScore);
 		btnSaveScore.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -226,7 +203,7 @@ public class mainWindow extends JFrame implements ActionListener{
 				
 				if(resultToSave.getIsChecked() == 0){//resultToSave.getIsChecked() == 0
 					if(examComboBox.getSelectedIndex()== -1){
-						JOptionPane.showMessageDialog(null, "Please Select Exam");
+						JOptionPane.showMessageDialog(null, "Faut d'abord selectionner un examen !");
 						return;
 					}
 					db.saveScore(resultToSave, ((Exam)examComboBox.getSelectedItem()).getExamId(), resultToSave.getScore());
@@ -254,40 +231,30 @@ public class mainWindow extends JFrame implements ActionListener{
 					}
 				
 					textArea.setText(textToShow);
-					
-//					imageSelectComboBox.removeAllItems();
-//            		for(int i=0;i<detectResults.size();i++){
-//            			imageSelectComboBox.addItem(detectResults.get(i));
-//            		}
-            		imageSelectComboBox.setSelectedItem(resultToSave);
-            		
-            		
-					
+            		imageSelectComboBox.setSelectedItem(resultToSave);	
 				}
 				else{
-					JOptionPane.showMessageDialog(null, "It's Already checked");
+					JOptionPane.showMessageDialog(null, "Feuille dèjà traitée !");
 				}
 			}
 		});
 		
 		
-		JButton btnProcessAll = new JButton("Process and Save All");
-		btnProcessAll.setBounds(466, 610, 197, 31);
+		JButton btnProcessAll = new JButton("Tous traiter et sauvegarder");
+		btnProcessAll.setBounds(460, 609, 218, 31);
 		contentPane.add(btnProcessAll);
 		
-		JButton createButton = new JButton("Create Answer Sheet");
-		createButton.setBounds(555, 41, 120, 23);
-		contentPane.add(createButton);
 		
-		createButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
-				
+		JButton btnGestionDesAnnes = new JButton("Gestion des ann\u00E9es scolaires");
+		btnGestionDesAnnes.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				FrameWindow fw = new FrameWindow();
+				fw.frame.setVisible(false);
+				fw.frameGestionAnneeScolaire.setVisible(true);
 			}
 		});
-		
+		btnGestionDesAnnes.setBounds(460, 525, 218, 31);
+		contentPane.add(btnGestionDesAnnes);
 		btnProcessAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				for(int d=0; d< detectResults.size(); d++){
@@ -323,11 +290,7 @@ public class mainWindow extends JFrame implements ActionListener{
 					}
 				
 					textArea.setText(textToShow);
-					
-//					imageSelectComboBox.removeAllItems();
-//            		for(int i=0;i<detectResults.size();i++){
-//            			imageSelectComboBox.addItem(detectResults.get(i));
-//            		}
+
             		imageSelectComboBox.setSelectedItem(resultToSave);
             		
             		
@@ -339,28 +302,7 @@ public class mainWindow extends JFrame implements ActionListener{
 			}
 			}
 		});
-		
-//		JButton btnProcess = new JButton("Process");
-//		btnProcess.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent arg0) {
-//				DetectResult detect = new DetectResult(imageUrl);
-//				detect.Processing();
-//				String textToShow = "";
-//				textToShow+="Student Id is:"+detect.getStudentId()+"\n";
-//				answers = detect.getAnswers();
-//				for(int i=0;i<answers.size();i++){
-//					textToShow+="Question :"+(i+1)+" Answer is :"+answers.get(i)+"\n";
-//					
-//				}
-//				textArea.setText(textToShow);
-//			}
-//		});
-//		btnProcess.setBounds(574, 36, 89, 23);
-//		contentPane.add(btnProcess);
-		
-		
-		
-		
+			
 	}
 
 	@Override

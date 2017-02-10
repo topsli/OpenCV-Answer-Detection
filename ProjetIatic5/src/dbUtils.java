@@ -9,7 +9,6 @@ import com.mysql.jdbc.Statement;
 
 import models.Exam;
 import models.SchoolYear;
-import models.StudentScore;
 import models.Subject;
 
 public class dbUtils {
@@ -21,14 +20,14 @@ public class dbUtils {
 		String username = "root";
 		String password = "";
 
-		System.out.println("Connecting database...");
+		System.out.println("Connexion à la base de données...");
 		
 		try  {
 			Class.forName("com.mysql.jdbc.Driver");
 			connection = (Connection) DriverManager.getConnection(url, username, password);
-		    System.out.println("Database connected!");
+		    System.out.println("Connexion à la base de données effectuée avec succées !");
 		} catch (SQLException e) {
-		    throw new IllegalStateException("Cannot connect the database!", e);
+		    throw new IllegalStateException("Connexion échouée !", e);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -50,8 +49,6 @@ public class dbUtils {
 			e.printStackTrace();
 			return null;
 		}
-		
-		
 	}
 	
 	List<Subject> getSubjectFromSchoolYear(SchoolYear schoolyear){
@@ -94,19 +91,9 @@ public class dbUtils {
 	
 	public void saveScore(DetectResult detectresult,int examId,int score){
 		try {
-			
 			statement = (Statement) connection.createStatement();
 			statement.executeUpdate("INSERT INTO studentscore(studentid,score,examid) VALUES ('"+detectresult.getStudentId()+"',"+score+","+examId+")ON DUPLICATE KEY UPDATE score = score + "+score+";");
-//			ResultSet resultSet = statement.executeQuery("select * from studentscore where studentid ='"+detectresult.getStudentId()+"'");
-//			StudentScore studentscore = new StudentScore();
-//			if (resultSet.next()) {
-//				studentscore.setStudentId(resultSet.get);
-//				studentscore.setScore(score);
-//			}
-//			else{
-//				
-//			}
-		} catch (SQLException e) {
+		}catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}

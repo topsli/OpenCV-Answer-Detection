@@ -2,7 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="C:/opencv/build/java/opencv-310.jar"/>
+	<classpathentry kind="lib" path="opencv-310.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Jiravat/Desktop/Works/Opencv Answer/mysql-connector-java-5.1.40-bin.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jiravat/Desktop/Works/ProjetNotation/Imshow.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
