@@ -23,8 +23,8 @@ public class DetectResult {
 	String imageUrl;
 	int score = 0;
 	int isChecked = 0;
-	String tamplateUrl = "C:/Users/Jiravat/Documents/inputs/tamplate.png";
-	int match_method = Imgproc.TM_CCOEFF;
+	String tamplateUrl = "tamplete2.jpg";
+	int match_method = Imgproc.TM_CCOEFF_NORMED;
 	
 	Boolean checkAllNot(List<Integer> testStudentNumber){
 		for(int i=0;i<testStudentNumber.size();i++){
@@ -35,12 +35,40 @@ public class DetectResult {
 		return false;
 	}
 	
+	List<Point> getFourPoint(List<Point> pointList){
+		List<Point> fourPoint = new ArrayList<Point>();
+		Point topleft = null;
+		Point topright = null;
+		Point downleft = null;
+		Point downright = null;
+		for(int i=0;i<pointList.size();i++){
+			Point tmp = pointList.get(i);
+			if(topleft == null || (tmp.x < topleft.x && tmp.y < topleft.y) ){
+				topleft = tmp;
+			}
+			if(topright == null ||(tmp.x > topright.x && tmp.y < topright.y)){
+				topright = tmp;
+			}
+			if(downleft == null ||(tmp.x < downleft.x && tmp.y > downleft.y)){
+				downleft = tmp;
+			}
+			if(downright == null ||(tmp.x > downright.x && tmp.y > downright.y)){
+				downright = tmp;
+			}
+	    }
+		fourPoint.add(topleft);
+		fourPoint.add(topright);
+		fourPoint.add(downright);
+		fourPoint.add(downleft);
+		return fourPoint;
+	}
+	
 	public DetectResult(){
 		this.score = 0;
 	}
 	
-	public static void showResult(Mat img) {
-		Imgcodecs.imwrite("C:/Users/Jiravat/Documents/output.jpg", img);
+	public static void showResult(Mat img,String fileName) {
+		Imgcodecs.imwrite("C:/Users/Jiravat/Documents/"+fileName, img);
 	}
 	
 	public void Processing(){
@@ -67,62 +95,107 @@ public class DetectResult {
         // / Do the Matching and Normalize
         Imgproc.matchTemplate(inputMat, templ, result, match_method);
         Core.normalize(result, result, 0, 1, Core.NORM_MINMAX, -1, new Mat());
+        Imgproc.threshold(result, result, 0.1, 1, Imgproc.THRESH_TOZERO);  
+        double threshold = 0.95;
+        double maxval;
+        Mat dst = inputMat.clone();
+        
+        List<Point> src_pnt2 = new ArrayList<Point>();
+        
+        int numOfPoint = 0;
+        while(true) 
+        {
+            Core.MinMaxLocResult maxr = Core.minMaxLoc(result);
+            Point maxp = maxr.maxLoc;
+            maxval = maxr.maxVal;
+            Point maxop = new Point(maxp.x + templ.width(), maxp.y + templ.height());
+            if(maxval >= threshold)
+            {
+                System.out.println("Template Matches with input image");
 
-        // / Localizing the best match with minMaxLoc
-        MinMaxLocResult mmr = Core.minMaxLoc(result);
-
-        Point matchLoc;
-        if (match_method == Imgproc.TM_SQDIFF || match_method == Imgproc.TM_SQDIFF_NORMED) {
-            matchLoc = mmr.minLoc;
-        } else {
-            matchLoc = mmr.maxLoc;
+                Imgproc.rectangle(dst, maxp, new Point(maxp.x + templ.cols(),
+                        maxp.y + templ.rows()), new Scalar(0, 255, 0),5);
+                Imgproc.rectangle(result, maxp, new Point(maxp.x + templ.cols(),
+                        maxp.y + templ.rows()), new Scalar(0, 255, 0),-1);
+                
+                
+                double midX = lerp(maxp.x, maxop.x, .5);
+                double midY = lerp(maxp.y, maxop.y, .5);
+                
+//                Imgproc.circle(dst, new Point(midX, midY), 5, new Scalar(0, 255, 0), 5);
+//                Imgproc.circle(result, new Point(midX, midY), 5, new Scalar(0, 255, 0), 5);
+                src_pnt2.add(new Point(midX, midY));
+                numOfPoint++;
+                
+                
+            }else{
+                break;
+            }
         }
         
-        Mat resultMatchTamplete = inputMat.clone();
-        
-     // / Show me what you got
-        Imgproc.rectangle(resultMatchTamplete, matchLoc, new Point(matchLoc.x + templ.cols(),
-                matchLoc.y + templ.rows()), new Scalar(0, 255, 0));
-        
-        showResult(resultMatchTamplete);
+        showResult(dst, "outputGetPoint.jpg");
 	    
 	    //Perspective Transform
 	    Mat outputMat = new Mat(resultWidth,resultHeight, CvType.CV_8UC1);
 
-	    List<Point> src_pnt = new ArrayList<Point>();
 	    
 	    
 	    
-	    Point p0 = new Point(75.0, 75.0);
-	    src_pnt.add(p0);
-	    Point p1 = new Point(75.0, 100.0);
-	    src_pnt.add(p1);
-	    Point p2 = new Point(100.0, 100.0);
-	    src_pnt.add(p2);
-	    Point p3 = new Point(100.0, 75.0);
-	    src_pnt.add(p3);
+	    
+//	    Point p0 = new Point(75.0, 75.0);
+//	    src_pnt.add(p0);
+//	    Point p1 = new Point(75.0, 100.0);
+//	    src_pnt.add(p1);
+//	    Point p2 = new Point(100.0, 100.0);
+//	    src_pnt.add(p2);
+//	    Point p3 = new Point(100.0, 75.0);
+//	    src_pnt.add(p3);
+	    
+//	    Point tmp = src_pnt.get(3);
+//	    src_pnt.set(3, src_pnt.get(2));
+//	    src_pnt.set(2, src_pnt.get(1));
+//	    src_pnt.set(1, tmp);
+	    
+	    //List<Point> src_pnt = new ArrayList<Point>();
+//	    src_pnt.add(src_pnt2.get(0));
+//	    src_pnt.add(src_pnt2.get(1));
+//	    src_pnt.add(src_pnt2.get(2));
+//	    src_pnt.add(src_pnt2.get(4));
+	    
+	    List<Point> src_pnt = getFourPoint(src_pnt2);
+	    
 	    Mat startM = Converters.vector_Point2f_to_Mat(src_pnt);
 
 	    List<Point> dst_pnt = new ArrayList<Point>();
 	    Point p4 = new Point(0, 0);
 	    dst_pnt.add(p4);
-	    Point p5 = new Point(0, resultHeight);
+	    
+	    Point p5 = new Point(inputMat.cols(), 0);
 	    dst_pnt.add(p5);
-	    Point p6 = new Point(resultWidth, resultHeight);
+	    
+	    Point p6 = new Point(inputMat.cols(), inputMat.rows()); 
 	    dst_pnt.add(p6);
-	    Point p7 = new Point(resultWidth, 0);
+	    
+	    Point p7 = new Point(0, inputMat.rows());
 	    dst_pnt.add(p7);
+	    
+	    
 	    Mat endM = Converters.vector_Point2f_to_Mat(dst_pnt);
+	    
+	    System.out.println(src_pnt);
+	    System.out.println(dst_pnt);
 
-	    Mat M = new Mat(3, 3, CvType.CV_32F);
-	    Core.perspectiveTransform(startM, endM, M);
+	    Mat M = Imgproc.getPerspectiveTransform(startM, endM);
+//	    Mat M = new Mat(3, 3, CvType.CV_32F);
+//	    Core.perspectiveTransform(startM, endM, M);
 
-	    Size size = new Size(200.0, 200.0);
-	    //Scalar scalar = new Scalar(50.0);
+	    Size size = new Size(inputMat.cols(), inputMat.rows());
+//	    Scalar scalar = new Scalar(50.0);
 
-	    Imgproc.warpPerspective(inputMat, outputMat, M, size, Imgproc.INTER_LINEAR + Imgproc.CV_WARP_FILL_OUTLIERS);
-
+	    Imgproc.warpPerspective(inputMat, outputMat, M, size);
+	    
 	    Mat image = outputMat.clone();
+	    showResult(image, "outputPerSpectiveTest.jpg");
 	    //showResult(image);
 	    
 	    Imgproc.resize(image,image,new Size(1653,2338)); //mise en echelle
@@ -153,10 +226,25 @@ public class DetectResult {
     	}
 	    
 	    for(int i=contours.size()-1; i>0 ;i--){
-	        if (Imgproc.contourArea(contours.get(i)) > 50){
+	    	//check contours
+	    	
+        	
+	        if (Imgproc.contourArea(contours.get(i)) > 600){
+//	        	Rect _rect = Imgproc.boundingRect(contours.get(i));
+//		    	Rect _bigRect = _rect.clone();
+//		    	Rect _rect1 = new Rect(_bigRect.x,_bigRect.y,_bigRect.width/3,_bigRect.height);
+//	        	Rect _rect2 = new Rect(_bigRect.x+_bigRect.width/3,_bigRect.y,_bigRect.width/3,_bigRect.height);
+//	        	Rect _rect3 = new Rect(_bigRect.x+(_bigRect.width/3*2),_bigRect.y,_bigRect.width/3,_bigRect.height);
+//	        	Rect[] _rects ={_rect1, _rect2, _rect3};
+//	        	for (int b =0;b<_rects.length;b++){
+//	        		Imgproc.rectangle(image, new Point(_rects[b].x,_rects[b].y), new Point(_rects[b].x+_rects[b].width,_rects[b].y+_rects[b].height), new Scalar(255,0,0));
+//	        	}
+	        	
+	        	
 	            Rect rect = Imgproc.boundingRect(contours.get(i));
 	            int answer = 1;
-	            if ((rect.height > 20 && rect.height < 48) && (rect.width > 120 && rect.width < 200))	            
+	            //3box
+	            if ((rect.height > 45 && rect.height < 55) && (rect.width > 150 && rect.width < 200))	            
 	            {
 	            	Rect bigRect = rect.clone();
 	            	
@@ -167,63 +255,84 @@ public class DetectResult {
 	            	Rect rect3 = new Rect(bigRect.x+(bigRect.width/3*2),bigRect.y,bigRect.width/3,bigRect.height);
 	            	Rect[] rects ={rect1, rect2, rect3};
 	            	for (int b =0;b<rects.length;b++){
-	            	Mat boxMat = imageA.submat(rects[b]);
-	            	
-	            	double color = (double)Core.countNonZero(boxMat)/(boxMat.size().width*boxMat.size().height);
-	            	if(color > 0.7){
-	            		//La case cochée
-	            		Imgproc.rectangle(image, new Point(rects[b].x,rects[b].y), new Point(rects[b].x+rects[b].width,rects[b].y+rects[b].height), new Scalar(255,0,0));
-	            	}
-	            	else{
-	            		Imgproc.rectangle(image, new Point(rects[b].x,rects[b].y), new Point(rects[b].x+rects[b].width,rects[b].y+rects[b].height), new Scalar(0,0,255));
-	            		answer = b+1;
-	            		score += b*10;
-	            	}
+		            	Mat boxMat = imageA.submat(rects[b]);
+		            	
+		            	double color = (double)Core.countNonZero(boxMat)/(boxMat.size().width*boxMat.size().height);
+		            	if(color > 0.7){
+		            		//La case cochée
+		            		Imgproc.rectangle(image, new Point(rects[b].x,rects[b].y), new Point(rects[b].x+rects[b].width,rects[b].y+rects[b].height), new Scalar(255,0,0));
+		            	}
+		            	else{
+		            		Imgproc.rectangle(image, new Point(rects[b].x,rects[b].y), new Point(rects[b].x+rects[b].width,rects[b].y+rects[b].height), new Scalar(0,0,255));
+		            		answer = b+1;
+		            		score += b*10;
+		            	}
 	            	}
 	            	answers.add(answer);
 	            	question++;
 	            } 
 	            
-	            if ((rect.height > 21 && rect.height < 25) && (rect.width > 21 && rect.width < 25) && (rect.y<550) && checkAllNot(studentNumber))  //here i fix it      
+	            if ((rect.height > 26 && rect.height < 38) && (rect.width > 26 && rect.width < 38) && (rect.y<550) && checkAllNot(studentNumber))  //here i fix it      
 	            {
-	            	Imgproc.rectangle(image, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(0,0,255));
-	            	if(oldRect == null){
-	            		oldRect = rect;
+	            	//Imgproc.rectangle(image, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(0,0,255));
+	            	//check color
+	            	Mat boxMat = imageA.submat(rect);
+	            	double color = (double)Core.countNonZero(boxMat)/(boxMat.size().width*boxMat.size().height);
+	            	//System.out.print(color+",");
+	            	if(color > 0.6){
+	            		Imgproc.rectangle(image, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(0,255,0));
+	            		System.out.println("col :"+col_Student+" rect x:"+rect.x+" rect y:"+rect.y);
 	            	}
-	            	if(rect.y - oldRect.y > 60){
-	            		for(int l=0;l<8;l++){
-	            			if(studentNumber.get(l) == -1)studentNumber.set(l, row_Student+1);
-	            		}
+	            	else{
+	            		Imgproc.rectangle(image, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(0,0,255));
+	            		//studentNumber.set(col_Student, row_Student);
+	            		System.out.println("set :"+(8-col_Student)+","+(9-row_Student)+" col :"+col_Student+" rect x:"+rect.x+" rect y:"+rect.y);
 	            	}
-	            	if(rect.y - oldRect.y > 30){
-	            		row_Student++;
-	            		col_Student = 0;
-	            		if(last_x - oldRect.x > 63){
-	            			int col_toAdd = ((int)Math.round((last_x - oldRect.x)/68.0));
-	            			for(int l=0;l<col_toAdd;l++){
-		            			if(studentNumber.get(7-l) == -1)studentNumber.set(7-l, row_Student-1);
-		            		}
-	            		}
-	            	}
-	            	if (rect.x < first_x && col_Student == 0){
-	            		first_x = rect.x;	
-	            	}
-	            	if(rect.x - first_x > 64  && col_Student == 0){
-	            		int colToAdd = (int) (col_Student + Math.round((rect.x - first_x)/68.0));
-	            		
-	            		for(int l=0;l<colToAdd;l++){		            		
-		            		if(studentNumber.get(l) == -1)studentNumber.set(l, row_Student);
-		            		col_Student++;
-	            		}
-	            	}
-	            	else if(rect.x - oldRect.x > 120){
-	            		for(int l=0;l<Math.round((rect.x - oldRect.x- 43)/68);l++){
-	            			studentNumber.set(col_Student, row_Student);
-	            			col_Student++;
-	            		}
-	            	}
+	            	
 	            	col_Student++;
-	            	oldRect = rect;
+//	            	if(col_Student > 7){
+//	            		row_Student++;
+//	            		col_Student=0;
+//	            	}
+	            	
+	            	
+//	            	if(oldRect == null){
+//	            		oldRect = rect;
+//	            	}
+//	            	if(rect.y - oldRect.y > 60){
+//	            		for(int l=0;l<8;l++){
+//	            			if(studentNumber.get(l) == -1)studentNumber.set(l, row_Student+1);
+//	            		}
+//	            	}
+//	            	if(rect.y - oldRect.y > 30){
+//	            		row_Student++;
+//	            		col_Student = 0;
+//	            		if(last_x - oldRect.x > 63){
+//	            			int col_toAdd = ((int)Math.round((last_x - oldRect.x)/68.0));
+//	            			for(int l=0;l<col_toAdd;l++){
+//		            			if(studentNumber.get(7-l) == -1)studentNumber.set(7-l, row_Student-1);
+//		            		}
+//	            		}
+//	            	}
+//	            	if (rect.x < first_x && col_Student == 0){
+//	            		first_x = rect.x;	
+//	            	}
+//	            	if(rect.x - first_x > 64  && col_Student == 0){
+//	            		int colToAdd = (int) (col_Student + Math.round((rect.x - first_x)/68.0));
+//	            		
+//	            		for(int l=0;l<colToAdd;l++){		            		
+//		            		if(studentNumber.get(l) == -1)studentNumber.set(l, row_Student);
+//		            		col_Student++;
+//	            		}
+//	            	}
+//	            	else if(rect.x - oldRect.x > 120){
+//	            		for(int l=0;l<Math.round((rect.x - oldRect.x- 43)/68);l++){
+//	            			studentNumber.set(col_Student, row_Student);
+//	            			col_Student++;
+//	            		}
+//	            	}
+//	            	col_Student++;
+//	            	oldRect = rect;
 	            }
 	        }	      
 	    }
@@ -234,8 +343,14 @@ public class DetectResult {
 	    	}
 	    	studentId+=studentNumber.get(i);
 	    }	
+	    showResult(image, "outputAnswer.jpg");
 	}
 	
+	double lerp(double a, double b, double f)
+	{
+	    return a + f * (b - a);
+	}
+
 	public String getStudentId(){
 		return studentId;
 	}
