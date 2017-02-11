@@ -1,8 +1,8 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.opencv.core.Core;
-import org.opencv.core.Core.MinMaxLocResult;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -13,8 +13,6 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
-
-import com.atul.JavaOpenCV.Imshow;
 
 public class DetectResult {
 	List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
@@ -33,6 +31,81 @@ public class DetectResult {
 			}
 		}
 		return false;
+	}
+	
+	List<Integer> getStudentsIdFromRect(List<Rect> inputRect,List<Integer> studentNumber){
+		//int[] yX = {138, 177, 216, 255, 291, 331, 369, 409, 448, 487};
+		ArrayList<Integer> xList = new ArrayList<Integer>();
+		xList.addAll(Arrays.asList(0,1,2,3,4,5,6,7));
+//		List<Rect> d1 = new ArrayList<Rect>();
+//		List<Rect> d2 = new ArrayList<Rect>();
+//		List<Rect> d3 = new ArrayList<Rect>();
+//		List<Rect> d4 = new ArrayList<Rect>();
+//		List<Rect> d5 = new ArrayList<Rect>();
+//		List<Rect> d6 = new ArrayList<Rect>();
+//		List<Rect> d7 = new ArrayList<Rect>();
+//		List<Rect> d8 = new ArrayList<Rect>();
+		int row=0;
+		List<Object> toRemove = new ArrayList<Object>();
+//		for(Object a: list){
+//		    if(a.getXXX().equalsIgnoreCase("AAA")){
+//		        
+//		    }
+//		}
+		int yOld = inputRect.get(0).y;
+		for(int i=0;i<inputRect.size();i++){
+			if(inputRect.get(i).y - yOld > 30){
+				System.out.println(xList);
+				System.out.println(toRemove);
+				xList.removeAll(toRemove);
+				System.out.println(xList);
+				for(int x=0;x<xList.size();x++){
+					studentNumber.set(xList.get(x), row);
+					System.out.println("set studentId:"+ xList.get(x)+" "+row);
+				}
+				toRemove.clear();
+				xList.clear();
+				xList.addAll(Arrays.asList(0,1,2,3,4,5,6,7));
+				row++;
+				yOld = inputRect.get(i).y;
+			}
+			if(inputRect.get(i).x > 225 && inputRect.get(i).x < 235){
+				toRemove.add(0);
+//				d1.add(inputRect.get(i));
+			}
+			else if(inputRect.get(i).x > 300 && inputRect.get(i).x < 310){
+				toRemove.add(1);
+//				d2.add(inputRect.get(i));
+			}
+			else if(inputRect.get(i).x > 375 && inputRect.get(i).x < 380){
+				toRemove.add(2);
+//				d3.add(inputRect.get(i));
+			}
+			else if(inputRect.get(i).x > 445 && inputRect.get(i).x < 455){
+				toRemove.add(3);
+//				d4.add(inputRect.get(i));
+			}
+			else if(inputRect.get(i).x > 520 && inputRect.get(i).x < 530){
+				toRemove.add(4);
+//				d5.add(inputRect.get(i));
+			}
+			else if(inputRect.get(i).x > 590 && inputRect.get(i).x < 605){
+				toRemove.add(5);
+//				d6.add(inputRect.get(i));
+			}
+			else if(inputRect.get(i).x > 665 && inputRect.get(i).x < 680){
+				toRemove.add(6);
+//				d7.add(inputRect.get(i));
+			}
+			else if(inputRect.get(i).x > 740 && inputRect.get(i).x < 755){
+				toRemove.add(7);
+//				d8.add(inputRect.get(i));
+			}
+			
+		}
+		
+		return studentNumber;
+		
 	}
 	
 	List<Point> getFourPoint(List<Point> pointList){
@@ -225,6 +298,7 @@ public class DetectResult {
     		isChecked = 0;
     	}
 	    
+    	List<Rect> listRects = new ArrayList<Rect>();
 	    for(int i=contours.size()-1; i>0 ;i--){
 	    	//check contours
 	    	
@@ -272,6 +346,7 @@ public class DetectResult {
 	            	question++;
 	            } 
 	            
+	           
 	            if ((rect.height > 26 && rect.height < 38) && (rect.width > 26 && rect.width < 38) && (rect.y<550) && checkAllNot(studentNumber))  //here i fix it      
 	            {
 	            	//Imgproc.rectangle(image, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(0,0,255));
@@ -282,6 +357,7 @@ public class DetectResult {
 	            	if(color > 0.6){
 	            		Imgproc.rectangle(image, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(0,255,0));
 	            		System.out.println("col :"+col_Student+" rect x:"+rect.x+" rect y:"+rect.y);
+	            		listRects.add(rect);
 	            	}
 	            	else{
 	            		Imgproc.rectangle(image, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(0,0,255));
@@ -336,6 +412,9 @@ public class DetectResult {
 	            }
 	        }	      
 	    }
+	    
+	    System.out.println("listRects"+listRects);
+	    studentNumber = getStudentsIdFromRect(listRects,studentNumber);
 	    studentId = "";
 	    for(int i=0;i<studentNumber.size();i++){
 	    	if(studentNumber.get(i) == -1){
