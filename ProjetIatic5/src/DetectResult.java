@@ -47,11 +47,6 @@ public class DetectResult {
 //		List<Rect> d8 = new ArrayList<Rect>();
 		int row=0;
 		List<Object> toRemove = new ArrayList<Object>();
-//		for(Object a: list){
-//		    if(a.getXXX().equalsIgnoreCase("AAA")){
-//		        
-//		    }
-//		}
 		int yOld = inputRect.get(0).y;
 		for(int i=0;i<inputRect.size();i++){
 			if(inputRect.get(i).y - yOld > 30){
@@ -109,30 +104,43 @@ public class DetectResult {
 	}
 	
 	List<Point> getFourPoint(List<Point> pointList){
-		List<Point> fourPoint = new ArrayList<Point>();
 		Point topleft = null;
+		int topleftMax =0;
 		Point topright = null;
+		int toprightMax =0;
 		Point downleft = null;
+		int downleftMax =0;
 		Point downright = null;
+		int downrightMax =0;
 		for(int i=0;i<pointList.size();i++){
 			Point tmp = pointList.get(i);
-			if(topleft == null || (tmp.x < topleft.x && tmp.y < topleft.y) ){
+			if(topleft == null || (tmp.x-topleft.x)+(tmp.y-topleft.y) < topleftMax ){
 				topleft = tmp;
+				topleftMax = ((int)((tmp.x-topleft.x)+(tmp.y-topleft.y)));
+				System.out.println("set topleft to :"+topleft);
 			}
-			if(topright == null ||(tmp.x > topright.x && tmp.y < topright.y)){
+			if(topright == null || (tmp.x-topright.x)+(topright.y-tmp.y) > toprightMax){
 				topright = tmp;
+				toprightMax = ((int)((tmp.x-topright.x)+(topright.y-tmp.y)));
+				System.out.println("set topright to :"+topright);
 			}
-			if(downleft == null ||(tmp.x < downleft.x && tmp.y > downleft.y)){
+			if(downleft == null || (downleft.x-tmp.x)+(tmp.y-downleft.y) > downleftMax){
 				downleft = tmp;
+				downleftMax = ((int)((downleft.x-tmp.x)+(tmp.y-downleft.y)));
+				System.out.println("set downleft to :"+downleft);
 			}
-			if(downright == null ||(tmp.x > downright.x && tmp.y > downright.y)){
+			if(downright == null ||  (tmp.x-downright.x)+(tmp.y-downright.y) > downrightMax ){
 				downright = tmp;
+				downrightMax = ((int)((tmp.x-downright.x)+(tmp.y-downright.y)));
+				System.out.println("set downright to :"+downright);
 			}
 	    }
-		fourPoint.add(topleft);
-		fourPoint.add(topright);
-		fourPoint.add(downright);
-		fourPoint.add(downleft);
+		System.out.println(topleft+":"+ topright+":"+ downright+":"+ downleft);
+		List<Point> fourPoint = new ArrayList<Point>(Arrays.asList(topleft, topright, downright, downleft));
+//		fourPoint.add(topleft);
+//		fourPoint.add(topright);
+//		fourPoint.add(downright);
+//		fourPoint.add(downleft);
 		return fourPoint;
 	}
 	
@@ -184,7 +192,7 @@ public class DetectResult {
             Point maxop = new Point(maxp.x + templ.width(), maxp.y + templ.height());
             if(maxval >= threshold)
             {
-                System.out.println("Template Matches with input image");
+                //System.out.println("Template Matches with input image");
 
                 Imgproc.rectangle(dst, maxp, new Point(maxp.x + templ.cols(),
                         maxp.y + templ.rows()), new Scalar(0, 255, 0),5);
@@ -208,11 +216,12 @@ public class DetectResult {
         
         showResult(dst, "outputGetPoint.jpg");
 	    
+        
 	    //Perspective Transform
 	    Mat outputMat = new Mat(resultWidth,resultHeight, CvType.CV_8UC1);
 
 	    
-	    
+	    System.out.println(src_pnt2);
 	    
 	    
 //	    Point p0 = new Point(75.0, 75.0);
@@ -283,9 +292,9 @@ public class DetectResult {
 	    int question = 0;
 	    int col_Student = 0;
 	    int row_Student = 0;
-	    Rect oldRect = null;
-	    int first_x = 277; //269
-	    int last_x = 778; //774	    
+//	    Rect oldRect = null;
+//	    int first_x = 277; //269
+//	    int last_x = 778; //774	    
 	    
 	    Rect numberRect = new Rect(new Point(70,120), new Point(220,40));
 	    Imgproc.rectangle(image, new Point(70,120), new Point(220,40), new Scalar(255,0,0));
@@ -322,6 +331,48 @@ public class DetectResult {
 	            {
 	            	Rect bigRect = rect.clone();
 	            	
+	            	Rect bigRectforgetline = bigRect.clone();
+	            	bigRectforgetline.width = bigRectforgetline.width - 20;
+	            	bigRectforgetline.x =  bigRectforgetline.x + 10;
+	            	//get Line of big rect
+	            	Mat bigRectMat = imageA.submat(bigRectforgetline);
+	            	Mat resultbigRectMat = bigRectMat.clone();//
+	            	//Imgproc.cvtColor(bigRectMat, bigRectMat, Imgproc.COLOR_YUV420sp2RGB, 4);
+	                //Imgproc.cvtColor(bigRectMat, bigRectMat, Imgproc.COLOR_RGB2GRAY, 4);
+	                
+	            	Imgproc.threshold(bigRectMat,bigRectMat, 253, 255, Imgproc.THRESH_BINARY_INV+Imgproc.THRESH_MASK); 
+	            	//Imgproc.Canny(bigRectMat, bigRectMat,100,150, 3, true);
+	            	
+	            	
+	            	Mat lines = new Mat();
+	            	int thresholdline = -253;
+	                int minLineSize = 30;//30
+	                int lineGap = 6;
+	                Imgproc.HoughLinesP(bigRectMat, lines, 2, Math.PI/180, thresholdline, minLineSize, lineGap);
+	                
+	                
+	                
+	            	//draw line
+	            	System.out.println("Number Of Lines :"+lines.rows());
+	            	for (int x = 0; x < lines.rows(); x++) 
+	                {
+	                      double[] vec = lines.get(x, 0);
+	                      double x1 = vec[0], 
+	                             y1 = vec[1],
+	                             x2 = vec[2],
+	                             y2 = vec[3];
+	                      Point start = new Point(x1, y1);
+	                      Point end = new Point(x2, y2);
+
+	                      Imgproc.line(resultbigRectMat, start, end, new Scalar(255,0,0), 1);
+	                      
+
+	                }
+	            	showResult(resultbigRectMat, "getLineinbox"+question+".jpg");
+	            	
+	            	int numberQuestionBox = lines.rows()+1;
+	            	
+	            	
 	            	Imgproc.rectangle(image, new Point(bigRect.x-10,bigRect.y-10), new Point(bigRect.x+bigRect.width+10,bigRect.y+bigRect.height+10), new Scalar(0,255,0));
 	            	//this part split bigbox to 3 boxs
 	            	Rect rect1 = new Rect(bigRect.x,bigRect.y,bigRect.width/3,bigRect.height);
@@ -330,7 +381,7 @@ public class DetectResult {
 	            	Rect[] rects ={rect1, rect2, rect3};
 	            	for (int b =0;b<rects.length;b++){
 		            	Mat boxMat = imageA.submat(rects[b]);
-		            	
+		            
 		            	double color = (double)Core.countNonZero(boxMat)/(boxMat.size().width*boxMat.size().height);
 		            	if(color > 0.7){
 		            		//La case cochée
