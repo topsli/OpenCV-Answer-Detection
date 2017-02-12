@@ -20,6 +20,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.sql.SQLException;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextArea;
 
@@ -30,6 +31,7 @@ public class mainWindow extends JFrame implements ActionListener{
 	List<SchoolYear> schoolYears = db.getSchoolYears();
 	List<Subject> subjects = new ArrayList<>();
 	List<Integer> answers = new ArrayList<>();
+	JComboBox yearComboBox = new JComboBox();
 	JComboBox subjectComboBox = new JComboBox();
 	JComboBox examComboBox = new JComboBox();
 	public String imageUrl;
@@ -37,7 +39,7 @@ public class mainWindow extends JFrame implements ActionListener{
 	public List<DetectResult> detectResults = new ArrayList<DetectResult>();
 	JComboBox imageSelectComboBox = new JComboBox();
 	public List<Exam> exams= new ArrayList<Exam>();
-
+	List<Integer> questionFirstNumber = new ArrayList<Integer>();
 
 	/**
 	 * Create the frame.
@@ -56,7 +58,6 @@ public class mainWindow extends JFrame implements ActionListener{
 		lblSchoolYear.setBounds(10, 15, 92, 14);
 		contentPane.add(lblSchoolYear);
 		
-		JComboBox yearComboBox = new JComboBox();
 		yearComboBox.setBounds(107, 11, 70, 22);
 		for(int i=0;i<schoolYears.size();i++){
 			yearComboBox.addItem(schoolYears.get(i));
@@ -137,16 +138,19 @@ public class mainWindow extends JFrame implements ActionListener{
 							reponse = "Bien aquis"; // very good marks
 						}
 						
-						textToShow+="Question"+(i+1)+" ==> "+reponse+"\n";
+						//textToShow+="Question"+(i+1)+" ==> "+reponse+"\n";
+						textToShow+="Question"+(questionFirstNumber.get(imageSelectComboBox.getSelectedIndex())+i)+" ==> "+answers.get(i)+"\n";
+						
 						
 					}
-					if(detect.getIsChecked() == 1){
-						textToShow+="Feuille : remplie !\n";
-						textToShow+="Note :"+detect.getScore();
-					}
-					else{
-						textToShow+="Feuille : non remplie !";
-					}
+					textToShow+="Note :"+detect.getScore();
+//					if(detect.getIsChecked() == 1){
+//						textToShow+="Feuille : remplie !\n";
+//						textToShow+="Note :"+detect.getScore();
+//					}
+//					else{
+//						textToShow+="Feuille : non remplie !";
+//					}
 				
 					textArea.setText(textToShow);
 				}
@@ -169,6 +173,7 @@ public class mainWindow extends JFrame implements ActionListener{
             		File[] selectedFiles = fc.getSelectedFiles();
             		imageSelectComboBox.removeAllItems();
             		detectResults = new ArrayList<DetectResult>();
+            		int questionNumber = 1;
             		for(int i=0;i<selectedFiles.length;i++){
             			String path = selectedFiles[i].getAbsolutePath();
             			imageUrls.add(path);
@@ -176,7 +181,9 @@ public class mainWindow extends JFrame implements ActionListener{
             			detect.setImageUrl(path);
             			detect.Processing();
             			detectResults.add(detect);
+            			questionFirstNumber.add(questionNumber);
             			imageSelectComboBox.addItem(detect);
+            			questionNumber += detect.getAnswers().size();
             		}   		
             	}
             	else
@@ -206,7 +213,14 @@ public class mainWindow extends JFrame implements ActionListener{
 						JOptionPane.showMessageDialog(null, "Faut d'abord selectionner un examen !");
 						return;
 					}
-					db.saveScore(resultToSave, ((Exam)examComboBox.getSelectedItem()).getExamId(), resultToSave.getScore());
+					try {
+						db.saveScore(resultToSave.getStudentId(), ((Exam)examComboBox.getSelectedItem()).getExamId(), resultToSave.getScore());
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						JOptionPane.showMessageDialog(null, "Student Id"+resultToSave.getStudentId()+" is already add:");
+						
+						e1.printStackTrace();
+					}
 					resultToSave.writeScore();
 					String path = resultToSave.getImageUrl();
 					ImageIcon myImage = new ImageIcon(path);
@@ -217,17 +231,20 @@ public class mainWindow extends JFrame implements ActionListener{
 	        		
 	        		String textToShow = "";
 					textToShow+="Student Id is:"+resultToSave.getStudentId()+"\n";
+//					if(resultToSave.getStudentId().equals("Student Id Not Found")){
+//						JOptionPane.showMessageDialog(null, "Student Id Not Found");
+//					}
 					answers = resultToSave.getAnswers();
 					for(int i=0;i<answers.size();i++){
 						textToShow+="Question :"+(i+1)+" Answer is :"+answers.get(i)+"\n";
 						
 					}
 					if(resultToSave.getIsChecked() == 1){
-						textToShow+="Checked : checked\n";
+//						textToShow+="Checked : checked\n";
 						textToShow+="Score :"+resultToSave.getScore();
 					}
 					else{
-						textToShow+="Checked : not checked";
+//						textToShow+="Checked : not checked";
 					}
 				
 					textArea.setText(textToShow);
@@ -257,49 +274,85 @@ public class mainWindow extends JFrame implements ActionListener{
 		contentPane.add(btnGestionDesAnnes);
 		btnProcessAll.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				String textToShow = "";
+				int scoreToSave = 0;
+				String studentIdToSave = "";
 				for(int d=0; d< detectResults.size(); d++){
-				DetectResult resultToSave = detectResults.get(d);//(DetectResult)imageSelectComboBox.getSelectedItem();
-				
-				if(resultToSave.getIsChecked() == 0){//resultToSave.getIsChecked() == 0
-					if(examComboBox.getSelectedIndex()== -1){
-						JOptionPane.showMessageDialog(null, "Please Select Exam");
-						return;
-					}
-					db.saveScore(resultToSave, ((Exam)examComboBox.getSelectedItem()).getExamId(), resultToSave.getScore());
-					resultToSave.writeScore();
-					String path = resultToSave.getImageUrl();
-					ImageIcon myImage = new ImageIcon(path);
-	        		Image img = myImage.getImage();
-	        		Image newImage = img.getScaledInstance(labelImage.getWidth(), labelImage.getHeight(), Image.SCALE_SMOOTH);
-	        		ImageIcon finalImg = new ImageIcon(newImage);
-	        		labelImage.setIcon(finalImg);
-	        		
-	        		String textToShow = "";
-					textToShow+="Student Id is:"+resultToSave.getStudentId()+"\n";
-					answers = resultToSave.getAnswers();
-					for(int i=0;i<answers.size();i++){
-						textToShow+="Question :"+(i+1)+" Answer is :"+answers.get(i)+"\n";
+					DetectResult resultToSave = detectResults.get(d);//(DetectResult)imageSelectComboBox.getSelectedItem();
+					
+					if(resultToSave.getIsChecked() == 0){//resultToSave.getIsChecked() == 0
+						if(examComboBox.getSelectedIndex()== -1){
+							JOptionPane.showMessageDialog(null, "Please Select Exam");
+							return;
+						}
+//						db.saveScore(resultToSave, ((Exam)examComboBox.getSelectedItem()).getExamId(), resultToSave.getScore());
+						scoreToSave+=resultToSave.getScore();
+						resultToSave.writeScore();
+						//textToShow+=resultToSave.imageUrl+" was save to "+studentIdToSave+" with score"+resultToSave.getScore();
+						if(resultToSave.getStudentId().equals("Student Id Not Found") == false){
+							studentIdToSave = resultToSave.getStudentId();
+						}
+//						String path = resultToSave.getImageUrl();
+//						ImageIcon myImage = new ImageIcon(path);
+//		        		Image img = myImage.getImage();
+//		        		Image newImage = img.getScaledInstance(labelImage.getWidth(), labelImage.getHeight(), Image.SCALE_SMOOTH);
+//		        		ImageIcon finalImg = new ImageIcon(newImage);
+//		        		labelImage.setIcon(finalImg);
+		        		
+		        		
+	//					textToShow+="Student Id is:"+resultToSave.getStudentId()+"\n";
+	//					answers = resultToSave.getAnswers();
+	//					for(int i=0;i<answers.size();i++){
+	//						if(answers.get(i) == 0){
+	//							textToShow+="Question :"+(i+1)+" Doesn't Checked\n";
+	//							JOptionPane.showMessageDialog(null, "Question :"+(i+1)+" Doesn't Checked");
+	//						}
+	//						textToShow+="Question :"+(i+1)+" Answer is :"+answers.get(i)+"\n";
+	//						
+	//					}
+	//					if(resultToSave.getIsChecked() == 1){
+	//						textToShow+="Checked : checked\n";
+	//						textToShow+="Score :"+resultToSave.getScore();
+	//					}
+	//					else{
+	//						textToShow+="Checked : not checked";
+	//					}
+					
+						
+	
+//	            		imageSelectComboBox.setSelectedItem(resultToSave);
+	            		
+						
 						
 					}
-					if(resultToSave.getIsChecked() == 1){
-						textToShow+="Checked : checked\n";
-						textToShow+="Score :"+resultToSave.getScore();
-					}
 					else{
-						textToShow+="Checked : not checked";
+						
 					}
-				
-					textArea.setText(textToShow);
-
-            		imageSelectComboBox.setSelectedItem(resultToSave);
-            		
-            		
-					
+				}
+				if(studentIdToSave.equals("")){
+					JOptionPane.showMessageDialog(null, "Student Id NotFound");
 				}
 				else{
+					textToShow+="score :"+scoreToSave+"\n";
+					textToShow+="student id:"+studentIdToSave+"\n";
+					textToShow+="Year:"+((SchoolYear)yearComboBox.getSelectedItem()).getSchoolYear()+"\n";
+					textToShow+="Subject:"+((Subject)subjectComboBox.getSelectedItem()).getSubject()+"\n";
 					
+					textToShow+="Exam:"+((Exam)examComboBox.getSelectedItem()).getExamName()+"\n";
+					
+					try {
+						db.saveScore(studentIdToSave, ((Exam)examComboBox.getSelectedItem()).getExamId(), scoreToSave);
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						JOptionPane.showMessageDialog(null, "Student Id"+studentIdToSave+" is already add:");
+						e1.printStackTrace();
+						
+					}
+					
+					textArea.setText(textToShow);
 				}
-			}
+				
+				
 			}
 		});
 			

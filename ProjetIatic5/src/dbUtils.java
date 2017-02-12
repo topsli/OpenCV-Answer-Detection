@@ -89,12 +89,13 @@ public class dbUtils {
 		}
 	}
 	
-	public void saveScore(DetectResult detectresult,int examId,int score){
+	public void saveScore(String studentId,int examId,int score) throws SQLException{
 		try {
 			statement = (Statement) connection.createStatement();
-			statement.executeUpdate("INSERT INTO studentscore(studentid,score,examid) VALUES ('"+detectresult.getStudentId()+"',"+score+","+examId+")ON DUPLICATE KEY UPDATE score = score + "+score+";");
+			statement.executeUpdate("INSERT INTO studentscore(studentid,score,examid) VALUES ('"+studentId+"',"+score+","+examId+");");//ON DUPLICATE KEY UPDATE score = score + "+score+";");
 		}catch (SQLException e) {
-			e.printStackTrace();
+			throw e;
+			//e.printStackTrace();
 		}
 	}
 	

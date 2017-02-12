@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -16,6 +17,7 @@ import org.opencv.utils.Converters;
 
 public class DetectResult {
 	List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+	List<Integer> studentNumber = new ArrayList<Integer>();
 	String studentId;
 	List<Integer> answers = new ArrayList<Integer>();
 	String imageUrl;
@@ -23,6 +25,8 @@ public class DetectResult {
 	int isChecked = 0;
 	String tamplateUrl = "tamplete2.jpg";
 	int match_method = Imgproc.TM_CCOEFF_NORMED;
+	int isStudentMark = 0;
+	Mat image;
 	
 	Boolean checkAllNot(List<Integer> testStudentNumber){
 		for(int i=0;i<testStudentNumber.size();i++){
@@ -33,7 +37,7 @@ public class DetectResult {
 		return false;
 	}
 	
-	List<Integer> getStudentsIdFromRect(List<Rect> inputRect,List<Integer> studentNumber){
+	List<Integer> getStudentsIdFromRect(List<Rect> inputRect,List<Integer> studentNumber_){
 		//int[] yX = {138, 177, 216, 255, 291, 331, 369, 409, 448, 487};
 		ArrayList<Integer> xList = new ArrayList<Integer>();
 		xList.addAll(Arrays.asList(0,1,2,3,4,5,6,7));
@@ -50,13 +54,13 @@ public class DetectResult {
 		int yOld = inputRect.get(0).y;
 		for(int i=0;i<inputRect.size();i++){
 			if(inputRect.get(i).y - yOld > 30){
-				System.out.println(xList);
-				System.out.println(toRemove);
+//				System.out.println(xList);
+				//System.out.println(toRemove);
 				xList.removeAll(toRemove);
-				System.out.println(xList);
+//				System.out.println(xList);
 				for(int x=0;x<xList.size();x++){
-					studentNumber.set(xList.get(x), row);
-					System.out.println("set studentId:"+ xList.get(x)+" "+row);
+					studentNumber_.set(xList.get(x), row);
+//					System.out.println("set studentId:"+ xList.get(x)+" "+row);
 				}
 				toRemove.clear();
 				xList.clear();
@@ -64,42 +68,50 @@ public class DetectResult {
 				row++;
 				yOld = inputRect.get(i).y;
 			}
-			if(inputRect.get(i).x > 225 && inputRect.get(i).x < 235){
+			//if(inputRect.get(i).x > 225 && inputRect.get(i).x < 235){
+			if(inputRect.get(i).x > 200 && inputRect.get(i).x < 275){
 				toRemove.add(0);
 //				d1.add(inputRect.get(i));
 			}
-			else if(inputRect.get(i).x > 300 && inputRect.get(i).x < 310){
+			//if(inputRect.get(i).x > 300 && inputRect.get(i).x < 310){
+			if(inputRect.get(i).x > 275 && inputRect.get(i).x < 350){
 				toRemove.add(1);
 //				d2.add(inputRect.get(i));
 			}
-			else if(inputRect.get(i).x > 375 && inputRect.get(i).x < 380){
+			//if(inputRect.get(i).x > 375 && inputRect.get(i).x < 380){
+			if(inputRect.get(i).x > 350 && inputRect.get(i).x < 425){
 				toRemove.add(2);
 //				d3.add(inputRect.get(i));
 			}
-			else if(inputRect.get(i).x > 445 && inputRect.get(i).x < 455){
+			//if(inputRect.get(i).x > 445 && inputRect.get(i).x < 455){
+			if(inputRect.get(i).x > 425 && inputRect.get(i).x < 500){
 				toRemove.add(3);
 //				d4.add(inputRect.get(i));
 			}
-			else if(inputRect.get(i).x > 520 && inputRect.get(i).x < 530){
+			//if(inputRect.get(i).x > 520 && inputRect.get(i).x < 530){
+			if(inputRect.get(i).x > 500 && inputRect.get(i).x < 575){
 				toRemove.add(4);
 //				d5.add(inputRect.get(i));
 			}
-			else if(inputRect.get(i).x > 590 && inputRect.get(i).x < 605){
+			//if(inputRect.get(i).x > 590 && inputRect.get(i).x < 605){
+			if(inputRect.get(i).x > 575 && inputRect.get(i).x < 640){
 				toRemove.add(5);
 //				d6.add(inputRect.get(i));
 			}
-			else if(inputRect.get(i).x > 665 && inputRect.get(i).x < 680){
+			//if(inputRect.get(i).x > 665 && inputRect.get(i).x < 680){
+			if(inputRect.get(i).x > 640 && inputRect.get(i).x < 720){
 				toRemove.add(6);
 //				d7.add(inputRect.get(i));
 			}
-			else if(inputRect.get(i).x > 740 && inputRect.get(i).x < 755){
+			//if(inputRect.get(i).x > 740 && inputRect.get(i).x < 755){
+			if(inputRect.get(i).x > 720 && inputRect.get(i).x < 775){
 				toRemove.add(7);
 //				d8.add(inputRect.get(i));
 			}
 			
 		}
 		
-		return studentNumber;
+		return studentNumber_;
 		
 	}
 	
@@ -117,25 +129,25 @@ public class DetectResult {
 			if(topleft == null || (tmp.x-topleft.x)+(tmp.y-topleft.y) < topleftMax ){
 				topleft = tmp;
 				topleftMax = ((int)((tmp.x-topleft.x)+(tmp.y-topleft.y)));
-				System.out.println("set topleft to :"+topleft);
+//				System.out.println("set topleft to :"+topleft);
 			}
 			if(topright == null || (tmp.x-topright.x)+(topright.y-tmp.y) > toprightMax){
 				topright = tmp;
 				toprightMax = ((int)((tmp.x-topright.x)+(topright.y-tmp.y)));
-				System.out.println("set topright to :"+topright);
+//				System.out.println("set topright to :"+topright);
 			}
 			if(downleft == null || (downleft.x-tmp.x)+(tmp.y-downleft.y) > downleftMax){
 				downleft = tmp;
 				downleftMax = ((int)((downleft.x-tmp.x)+(tmp.y-downleft.y)));
-				System.out.println("set downleft to :"+downleft);
+//				System.out.println("set downleft to :"+downleft);
 			}
 			if(downright == null ||  (tmp.x-downright.x)+(tmp.y-downright.y) > downrightMax ){
 				downright = tmp;
 				downrightMax = ((int)((tmp.x-downright.x)+(tmp.y-downright.y)));
-				System.out.println("set downright to :"+downright);
+//				System.out.println("set downright to :"+downright);
 			}
 	    }
-		System.out.println(topleft+":"+ topright+":"+ downright+":"+ downleft);
+//		System.out.println(topleft+":"+ topright+":"+ downright+":"+ downleft);
 		List<Point> fourPoint = new ArrayList<Point>(Arrays.asList(topleft, topright, downright, downleft));
 //		fourPoint.add(topleft);
 //		fourPoint.add(topright);
@@ -156,7 +168,7 @@ public class DetectResult {
 		int resultWidth = 1653;
 	    int resultHeight = 2338;
 		
-		List<Integer> studentNumber = new ArrayList<Integer>();
+		
 		String number = "99999999";
 		String[] testStudentNumber = number.split("");
 		for(int i = 0; i < testStudentNumber.length; i++) {
@@ -179,7 +191,7 @@ public class DetectResult {
         Imgproc.threshold(result, result, 0.1, 1, Imgproc.THRESH_TOZERO);  
         double threshold = 0.95;
         double maxval;
-        Mat dst = inputMat.clone();
+//        Mat dst = inputMat.clone();
         
         List<Point> src_pnt2 = new ArrayList<Point>();
         
@@ -194,8 +206,8 @@ public class DetectResult {
             {
                 //System.out.println("Template Matches with input image");
 
-                Imgproc.rectangle(dst, maxp, new Point(maxp.x + templ.cols(),
-                        maxp.y + templ.rows()), new Scalar(0, 255, 0),5);
+//                Imgproc.rectangle(dst, maxp, new Point(maxp.x + templ.cols(),
+//                        maxp.y + templ.rows()), new Scalar(0, 255, 0),5);
                 Imgproc.rectangle(result, maxp, new Point(maxp.x + templ.cols(),
                         maxp.y + templ.rows()), new Scalar(0, 255, 0),-1);
                 
@@ -214,14 +226,14 @@ public class DetectResult {
             }
         }
         
-        showResult(dst, "outputGetPoint.jpg");
+        //showResult(dst, "outputGetPoint.jpg");
 	    
         
 	    //Perspective Transform
 	    Mat outputMat = new Mat(resultWidth,resultHeight, CvType.CV_8UC1);
 
 	    
-	    System.out.println(src_pnt2);
+//	    System.out.println(src_pnt2);
 	    
 	    
 //	    Point p0 = new Point(75.0, 75.0);
@@ -264,8 +276,8 @@ public class DetectResult {
 	    
 	    Mat endM = Converters.vector_Point2f_to_Mat(dst_pnt);
 	    
-	    System.out.println(src_pnt);
-	    System.out.println(dst_pnt);
+//	    System.out.println(src_pnt);
+//	    System.out.println(dst_pnt);
 
 	    Mat M = Imgproc.getPerspectiveTransform(startM, endM);
 //	    Mat M = new Mat(3, 3, CvType.CV_32F);
@@ -276,9 +288,8 @@ public class DetectResult {
 
 	    Imgproc.warpPerspective(inputMat, outputMat, M, size);
 	    
-	    Mat image = outputMat.clone();
-	    showResult(image, "outputPerSpectiveTest.jpg");
-	    //showResult(image);
+	    image = outputMat.clone();
+	    //showResult(image, "outputPerSpectiveTest.jpg");
 	    
 	    Imgproc.resize(image,image,new Size(1653,2338)); //mise en echelle
 	    Mat imageHSV = new Mat(image.size(), CvType.CV_8UC4);
@@ -291,23 +302,28 @@ public class DetectResult {
 	    
 	    int question = 0;
 	    int col_Student = 0;
-	    int row_Student = 0;
+//	    int row_Student = 0;
 //	    Rect oldRect = null;
 //	    int first_x = 277; //269
 //	    int last_x = 778; //774	    
 	    
-	    Rect numberRect = new Rect(new Point(70,120), new Point(220,40));
-	    Imgproc.rectangle(image, new Point(70,120), new Point(220,40), new Scalar(255,0,0));
-	    Mat numberRectMat = imageA.submat(numberRect);
-    	double colorNumber = (double)Core.countNonZero(numberRectMat)/(numberRectMat.size().width*numberRectMat.size().height); 
-    	if(colorNumber < 0.9){
-    		isChecked = 1;
-    	}
-    	else{
-    		isChecked = 0;
-    	}
+	    
+	    //check number in top left if colorNumber<0.9 mean ischecked
+//	    Rect numberRect = new Rect(new Point(70,120), new Point(220,40));
+//	    //Imgproc.rectangle(image, new Point(70,120), new Point(220,40), new Scalar(255,0,0));
+//	    Mat numberRectMat = inputMat.submat(numberRect);
+//    	double colorNumber = (double)Core.countNonZero(numberRectMat)/(numberRectMat.size().width*numberRectMat.size().height); 
+//    	if(colorNumber < 0.9){
+//    		isChecked = 1;
+//    	}
+//    	else{
+//    		isChecked = 0;
+//    	}
 	    
     	List<Rect> listRects = new ArrayList<Rect>();
+    	
+    	int numOfStudentId = 0;
+    	
 	    for(int i=contours.size()-1; i>0 ;i--){
 	    	//check contours
 	    	
@@ -327,7 +343,8 @@ public class DetectResult {
 	            Rect rect = Imgproc.boundingRect(contours.get(i));
 	            int answer = 1;
 	            //3box
-	            if ((rect.height > 45 && rect.height < 55) && (rect.width > 150 && rect.width < 200))	            
+//	            if ((rect.height > 45 && rect.height < 55) && (rect.width > 150 && rect.width < 200))
+	            if ((rect.height > 40 && rect.height < 60) && (rect.width > 140 && rect.width < 210))	            
 	            {
 	            	Rect bigRect = rect.clone();
 	            	
@@ -335,70 +352,91 @@ public class DetectResult {
 	            	bigRectforgetline.width = bigRectforgetline.width - 20;
 	            	bigRectforgetline.x =  bigRectforgetline.x + 10;
 	            	//get Line of big rect
-	            	Mat bigRectMat = imageA.submat(bigRectforgetline);
-	            	Mat resultbigRectMat = bigRectMat.clone();//
+//	            	Mat bigRectMat = imageA.submat(bigRectforgetline);
+//	            	Mat resultbigRectMat = bigRectMat.clone();//
 	            	//Imgproc.cvtColor(bigRectMat, bigRectMat, Imgproc.COLOR_YUV420sp2RGB, 4);
 	                //Imgproc.cvtColor(bigRectMat, bigRectMat, Imgproc.COLOR_RGB2GRAY, 4);
 	                
-	            	Imgproc.threshold(bigRectMat,bigRectMat, 253, 255, Imgproc.THRESH_BINARY_INV+Imgproc.THRESH_MASK); 
+//	            	Imgproc.threshold(bigRectMat,bigRectMat, 253, 255, Imgproc.THRESH_BINARY_INV+Imgproc.THRESH_MASK); 
 	            	//Imgproc.Canny(bigRectMat, bigRectMat,100,150, 3, true);
 	            	
 	            	
-	            	Mat lines = new Mat();
-	            	int thresholdline = -253;
-	                int minLineSize = 30;//30
-	                int lineGap = 6;
-	                Imgproc.HoughLinesP(bigRectMat, lines, 2, Math.PI/180, thresholdline, minLineSize, lineGap);
+//	            	Mat lines = new Mat();
+//	            	int thresholdline = -253;
+//	                int minLineSize = 30;//30
+//	                int lineGap = 6;
+//	                Imgproc.HoughLinesP(bigRectMat, lines, 2, Math.PI/180, thresholdline, minLineSize, lineGap);
 	                
 	                
 	                
 	            	//draw line
-	            	System.out.println("Number Of Lines :"+lines.rows());
-	            	for (int x = 0; x < lines.rows(); x++) 
-	                {
-	                      double[] vec = lines.get(x, 0);
-	                      double x1 = vec[0], 
-	                             y1 = vec[1],
-	                             x2 = vec[2],
-	                             y2 = vec[3];
-	                      Point start = new Point(x1, y1);
-	                      Point end = new Point(x2, y2);
-
-	                      Imgproc.line(resultbigRectMat, start, end, new Scalar(255,0,0), 1);
-	                      
-
-	                }
-	            	showResult(resultbigRectMat, "getLineinbox"+question+".jpg");
+//	            	System.out.println("Number Of Lines :"+lines.rows());
+//	            	for (int x = 0; x < lines.rows(); x++) 
+//	                {
+//	                      double[] vec = lines.get(x, 0);
+//	                      double x1 = vec[0], 
+//	                             y1 = vec[1],
+//	                             x2 = vec[2],
+//	                             y2 = vec[3];
+//	                      Point start = new Point(x1, y1);
+//	                      Point end = new Point(x2, y2);
+//
+//	                      Imgproc.line(resultbigRectMat, start, end, new Scalar(255,0,0), 1);
+//	                }
+//	            	showResult(bigRectMat, "getLineinbox"+question+".jpg");
 	            	
-	            	int numberQuestionBox = lines.rows()+1;
-	            	
-	            	
+//	            	int numberQuestionBox = lines.rows()+1;
+	            	int numberQuestionBox = 4;
 	            	Imgproc.rectangle(image, new Point(bigRect.x-10,bigRect.y-10), new Point(bigRect.x+bigRect.width+10,bigRect.y+bigRect.height+10), new Scalar(0,255,0));
 	            	//this part split bigbox to 3 boxs
-	            	Rect rect1 = new Rect(bigRect.x,bigRect.y,bigRect.width/3,bigRect.height);
-	            	Rect rect2 = new Rect(bigRect.x+bigRect.width/3,bigRect.y,bigRect.width/3,bigRect.height);
-	            	Rect rect3 = new Rect(bigRect.x+(bigRect.width/3*2),bigRect.y,bigRect.width/3,bigRect.height);
-	            	Rect[] rects ={rect1, rect2, rect3};
-	            	for (int b =0;b<rects.length;b++){
-		            	Mat boxMat = imageA.submat(rects[b]);
-		            
-		            	double color = (double)Core.countNonZero(boxMat)/(boxMat.size().width*boxMat.size().height);
-		            	if(color > 0.7){
+	            	List<Rect> rects = new ArrayList<Rect>();
+	            	int boxWidth = bigRect.width/numberQuestionBox;
+	            	for(int r=0;r<numberQuestionBox;r++)
+	            	{
+	            		Rect rect1 = new Rect(bigRect.x+(boxWidth*r)+10,bigRect.y+5,boxWidth-20,bigRect.height-10);
+	            		rects.add(rect1);
+	            	}
+//	            	Rect rect1 = new Rect(bigRect.x,bigRect.y,bigRect.width/3,bigRect.height);
+//	            	Rect rect2 = new Rect(bigRect.x+bigRect.width/3,bigRect.y,bigRect.width/3,bigRect.height);
+//	            	Rect rect3 = new Rect(bigRect.x+(bigRect.width/3*2),bigRect.y,bigRect.width/3,bigRect.height);
+	            	
+//	            	System.out.println(rects);
+	            	List<Integer> colorNonZeros = new ArrayList<Integer>();
+	            	for (int b =0;b<numberQuestionBox;b++){
+		            	Mat boxMat = imageA.submat(rects.get(b));
+		            	
+		            	//Imgproc.threshold(boxMat,boxMat, 250, 255, Imgproc.THRESH_BINARY_INV+Imgproc.THRESH_OTSU); 
+		            	//System.out.println(Core.countNonZero(boxMat));
+		            	//colorNonZeros.add(Core.countNonZero(boxMat));
+//		            	showResult(boxMat, "boxmat"+question+"box"+b+".jpg");
+		            	float color = (float) (Core.countNonZero(boxMat)/(boxMat.size().width*boxMat.size().height));
+//		            	System.out.println("Color:"+color);
+		            	if(color < 0.85){
 		            		//La case cochée
-		            		Imgproc.rectangle(image, new Point(rects[b].x,rects[b].y), new Point(rects[b].x+rects[b].width,rects[b].y+rects[b].height), new Scalar(255,0,0));
+		            		Imgproc.rectangle(image, new Point(rects.get(b).x,rects.get(b).y), new Point(rects.get(b).x+rects.get(b).width,rects.get(b).y+rects.get(b).height), new Scalar(255,0,0));
+		            		answer = b+1;
+//		            		score += b*10;
 		            	}
 		            	else{
-		            		Imgproc.rectangle(image, new Point(rects[b].x,rects[b].y), new Point(rects[b].x+rects[b].width,rects[b].y+rects[b].height), new Scalar(0,0,255));
-		            		answer = b+1;
-		            		score += b*10;
+		            		Imgproc.rectangle(image, new Point(rects.get(b).x,rects.get(b).y), new Point(rects.get(b).x+rects.get(b).width,rects.get(b).y+rects.get(b).height), new Scalar(0,0,255));
+		            		
 		            	}
 	            	}
+//	            	int minIndex = 0;
+//	                for (int m = 1; m < numberQuestionBox; m++) {
+//	                    int newnumber = colorNonZeros.get(m);
+//	                    if ((newnumber < colorNonZeros.get(minIndex))) {
+//	                        minIndex = m;
+//	                    }
+//	                }
+//	            	answers.add(minIndex+1);
 	            	answers.add(answer);
 	            	question++;
 	            } 
 	            
 	           
-	            if ((rect.height > 26 && rect.height < 38) && (rect.width > 26 && rect.width < 38) && (rect.y<550) && checkAllNot(studentNumber))  //here i fix it      
+//	            if ((rect.height > 26 && rect.height < 38) && (rect.width > 26 && rect.width < 38) && (rect.y<550) && checkAllNot(studentNumber))  //here i fix it      
+	            if ((rect.height > 24 && rect.height < 45) && (rect.width > 24 && rect.width < 45) && (rect.y<550) && checkAllNot(studentNumber))  //here i fix it      
 	            {
 	            	//Imgproc.rectangle(image, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(0,0,255));
 	            	//check color
@@ -407,13 +445,15 @@ public class DetectResult {
 	            	//System.out.print(color+",");
 	            	if(color > 0.6){
 	            		Imgproc.rectangle(image, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(0,255,0));
-	            		System.out.println("col :"+col_Student+" rect x:"+rect.x+" rect y:"+rect.y);
+	            		//System.out.println("col :"+col_Student+" rect x:"+rect.x+" rect y:"+rect.y);
 	            		listRects.add(rect);
+	            		
 	            	}
 	            	else{
+	            		numOfStudentId++;
 	            		Imgproc.rectangle(image, new Point(rect.x,rect.y), new Point(rect.x+rect.width,rect.y+rect.height), new Scalar(0,0,255));
 	            		//studentNumber.set(col_Student, row_Student);
-	            		System.out.println("set :"+(8-col_Student)+","+(9-row_Student)+" col :"+col_Student+" rect x:"+rect.x+" rect y:"+rect.y);
+	            		//System.out.println("set :"+(8-col_Student)+","+(9-row_Student)+" col :"+col_Student+" rect x:"+rect.x+" rect y:"+rect.y);
 	            	}
 	            	
 	            	col_Student++;
@@ -464,16 +504,23 @@ public class DetectResult {
 	        }	      
 	    }
 	    
-	    System.out.println("listRects"+listRects);
-	    studentNumber = getStudentsIdFromRect(listRects,studentNumber);
-	    studentId = "";
-	    for(int i=0;i<studentNumber.size();i++){
-	    	if(studentNumber.get(i) == -1){
-	    		studentNumber.set(i, 9);
-	    	}
-	    	studentId+=studentNumber.get(i);
-	    }	
-	    showResult(image, "outputAnswer.jpg");
+//	    System.out.println("listRects"+listRects);
+//	    System.out.println("numOfStudentId:"+numOfStudentId);
+	    if(numOfStudentId > 7){
+        	isStudentMark = 1;
+		    studentNumber = getStudentsIdFromRect(listRects,studentNumber);
+		    studentId = "";
+//		    System.out.println(studentNumber);
+		    for(int i=0;i<studentNumber.size();i++){
+		    	if(studentNumber.get(i) == -1){
+		    		studentNumber.set(i, 9);
+		    	}
+		    	studentId+=studentNumber.get(i);
+		    }
+	    }else{
+	    	studentId = "Student Id Not Found";
+	    }
+//	    showResult(image, "outputAnswer.jpg");
 	}
 	
 	double lerp(double a, double b, double f)
@@ -482,6 +529,16 @@ public class DetectResult {
 	}
 
 	public String getStudentId(){
+//		studentId = "";
+//		System.out.println(studentNumber);
+//	    for(int i=0;i<8;i++){
+//	    	if(studentNumber.get(i) == -1){
+//	    		studentNumber.set(i, 9);
+//	    		studentId = "Student Id Missing";
+//	    		return studentId;
+//	    	}
+//	    	studentId+=studentNumber.get(i);
+//	    }
 		return studentId;
 	}
 
@@ -510,13 +567,19 @@ public class DetectResult {
 	}
 	
 	public void writeScore(){
-		Mat image = Imgcodecs.imread(imageUrl);
+		//Mat image = Imgcodecs.imread(imageUrl);
 		this.isChecked = 1;
+		String[] strings = imageUrl.split(Pattern.quote("."));
+		String urlToOut = strings[0]+"Checked."+strings[1];
 		Imgproc.putText(image, ""+score ,new Point(70,120),1,7,new Scalar(0, 0, 255),7); 
-		Imgcodecs.imwrite(imageUrl, image);
+		Imgcodecs.imwrite(urlToOut, image);
 	}
 
 	public int getScore() {
+		score = 0;
+		for(int a=0;a<answers.size();a++){
+			score+=(answers.get(a)-1)*10;
+		}
 		return score;
 	}
 	
