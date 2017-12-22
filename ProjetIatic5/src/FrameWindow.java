@@ -12,10 +12,10 @@ public class FrameWindow{
 	
 	private void initialize() {
 		frame = new mainWindow();
-		frame.setTitle("Projet OpenCv Notation");
+		frame.setTitle("");
 		
 		frameGestionAnneeScolaire = new gestion();
-		frameGestionAnneeScolaire.setTitle("Gestion des années scolaires");
+		frameGestionAnneeScolaire.setTitle("PsyLife School");
 	}
 
 }

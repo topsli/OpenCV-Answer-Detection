@@ -14,25 +14,25 @@ import models.Subject;
 public class dbUtils {
 	private Connection connection;
 	private Statement statement;
-	
-	dbUtils(){
-		String url = "jdbc:mysql://localhost:3306/db";
-		String username = "root";
-		String password = "";
 
-		System.out.println("Connexion à la base de données...");
-		
+	dbUtils(){
+		String url = "jdbc:mysql://localhost:3306/opencvdb";
+		String username = "root";
+		String password = "root";
+
+		//System.out.println("Connection to the database ...");
+
 		try  {
 			Class.forName("com.mysql.jdbc.Driver");
 			connection = (Connection) DriverManager.getConnection(url, username, password);
-		    System.out.println("Connexion à la base de données effectuée avec succées !");
+			//System.out.println("Connection the database successfully !");
 		} catch (SQLException e) {
-		    throw new IllegalStateException("Connexion échouée !", e);
+			throw new IllegalStateException("Connexion exception !", e);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	List<SchoolYear> getSchoolYears(){
 		try {
 			statement = (Statement) connection.createStatement();
@@ -50,7 +50,7 @@ public class dbUtils {
 			return null;
 		}
 	}
-	
+
 	List<Subject> getSubjectFromSchoolYear(SchoolYear schoolyear){
 		try {
 			statement = (Statement) connection.createStatement();
@@ -69,7 +69,7 @@ public class dbUtils {
 			return null;
 		}
 	}
-	
+
 	List<Exam> getExamFromSubject(Subject subject){
 		try {
 			statement = (Statement) connection.createStatement();
@@ -88,7 +88,7 @@ public class dbUtils {
 			return null;
 		}
 	}
-	
+
 	public void saveScore(String studentId,int examId,int score) throws SQLException{
 		try {
 			statement = (Statement) connection.createStatement();
@@ -98,7 +98,7 @@ public class dbUtils {
 			//e.printStackTrace();
 		}
 	}
-	
+
 	void CloseDb(){
 		try {
 			connection.close();

@@ -3,7 +3,8 @@ import java.awt.EventQueue;
 import org.opencv.core.Core;
 
 
-
+// -Djava.library.path=$PROJECT_DIRS$\opencv\x64
+// -Djava.library.path=F:\WorkSpace\OpenProjects\OpenCV-Answer-Detection\ProjetIatic5\opencv\x64
 public class main {
 
 	public static void main(String[] args) {
